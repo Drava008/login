@@ -3,12 +3,14 @@ package com.example.user.login;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.BoolRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -25,12 +27,25 @@ public class CheckActivity extends AppCompatActivity {
 
     ListView list;
     String s;
+    Button button;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check);
+
+        button = (Button)findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences history = getSharedPreferences("history",MODE_PRIVATE);
+                SharedPreferences.Editor editor = history.edit();
+                editor.remove("date");
+                editor.commit();
+                list.setAdapter(null);
+            }
+        });
 
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日HH點mm分");
@@ -45,10 +60,12 @@ public class CheckActivity extends AppCompatActivity {
 
         if(s.toString().equals(""))
             login();
-        else
+        else {
             arrList();
+            login();
+        }
 
-        login();
+
 
 
     }
@@ -87,6 +104,8 @@ public class CheckActivity extends AppCompatActivity {
         Bundle bag = intent.getExtras();
         String loginid = bag.getString("loginid");
         String password = bag.getString("password");
+        boolean b1 = bag.getBoolean("b1");
+        boolean b2 = bag.getBoolean("b2");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日HH點mm分");
         Date date = new Date();
@@ -101,15 +120,21 @@ public class CheckActivity extends AppCompatActivity {
 
 
             SharedPreferences setting = getSharedPreferences("login",MODE_PRIVATE);
-            setting.edit().putString("loginid",loginid).commit();
-            setting.edit().putString("password",password).commit();
-
             SharedPreferences history = getSharedPreferences("history",MODE_PRIVATE);
-            history.edit().putString("date",s + " " + dateFormat.format(date)).commit();
-
-            s = history.getString("date", dateFormat.format(date));
 
 
+            if(b1 == true){
+                setting.edit().putString("loginid",loginid).commit();
+                setting.edit().putString("password",password).commit();
+            }else {
+                setting.edit().putString("loginid","").commit();
+                setting.edit().putString("password","").commit();
+            }
+
+            if(b2 == true){
+                s = history.getString("date", dateFormat.format(date));
+                history.edit().putString("date",s + " " + dateFormat.format(date)).commit();
+            }
 
 
         }else{
